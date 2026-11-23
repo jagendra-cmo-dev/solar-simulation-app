@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   Sparkles,
   Zap,
-  UserCheck,
+  Plus,
   CloudUpload,
   Database,
 } from 'lucide-react';
@@ -59,16 +59,17 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-xs text-slate-400 flex items-center gap-1.5">
-              <span>Client: <strong className="text-slate-200 font-medium">{clientDetails.name}</strong></span>
+              <span>Client: <strong className="text-slate-200 font-medium">{clientDetails.name || 'Not Added'}</strong></span>
               <span className="text-slate-600">•</span>
               <span className="font-mono text-slate-400">{clientDetails.quotationNumber}</span>
             </p>
             <button
               onClick={onOpenAdminModal}
-              className="text-[11px] text-amber-400 hover:text-amber-300 underline font-medium cursor-pointer"
-              title="Click to edit customer details, utility info & notes"
+              className="flex items-center gap-1 text-[11px] text-amber-400 hover:text-amber-300 font-semibold cursor-pointer underline"
+              title="Click to add or edit client details"
             >
-              (Edit Details)
+              <Plus className="w-3 h-3 stroke-[2.5]" />
+              <span>{clientDetails.name ? 'Edit' : 'Add Details'}</span>
             </button>
           </div>
         </div>
@@ -119,14 +120,14 @@ export const Header: React.FC<HeaderProps> = ({
           <span>{isSavingToCloud ? 'Saving...' : 'Save to DB'}</span>
         </button>
 
-        {/* Admin Proposal Setup Trigger */}
+        {/* Add Proposal Button with Bold Plus Icon */}
         <button
           onClick={onOpenAdminModal}
-          className="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 text-xs font-semibold flex items-center gap-1.5 border border-amber-500/40 transition-colors shadow-sm"
-          title="Admin: Fill client contact, utility info & custom terms"
+          className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md shadow-amber-500/25 transition-all cursor-pointer"
+          title="Add new customer details, utility specifications & quotation notes"
         >
-          <UserCheck className="w-3.5 h-3.5 text-amber-400" />
-          <span className="hidden sm:inline">Customer Setup</span>
+          <Plus className="w-4 h-4 stroke-[3]" />
+          <span>Add Proposal</span>
         </button>
 
         <button

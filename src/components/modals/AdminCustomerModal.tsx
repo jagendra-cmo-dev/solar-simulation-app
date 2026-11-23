@@ -9,6 +9,7 @@ import {
   Camera,
   Check,
   RefreshCw,
+  Trash2,
 } from 'lucide-react';
 import { useSolarStore } from '../../store/useSolarStore';
 import { ClientDetails } from '../../types/solar';
@@ -43,6 +44,29 @@ export const AdminCustomerModal: React.FC<AdminCustomerModalProps> = ({
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const quoteNo = `SPEPC-${new Date().getFullYear()}-${randomSuffix}`;
     handleChange('quotationNumber', quoteNo);
+  };
+
+  const handleClearForm = () => {
+    setFormData({
+      name: '',
+      phone: '',
+      email: '',
+      address: '',
+      consumerNumber: '',
+      sanctionedLoadKw: 0,
+      connectionPhase: '3-Phase',
+      epcCompanyName: formData.epcCompanyName || 'Solar EPC Solutions',
+      epcPhone: '',
+      epcEmail: '',
+      salesRepName: '',
+      salesRepPhone: '',
+      quotationNumber: formData.quotationNumber,
+      date: formData.date,
+      validityDays: 30,
+      specialDiscountInr: 0,
+      customNotes: '',
+      snapshotDataUrl: formData.snapshotDataUrl || '',
+    });
   };
 
   const handleCaptureSnapshot = () => {
@@ -154,7 +178,7 @@ export const AdminCustomerModal: React.FC<AdminCustomerModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <span>Customer Data & Proposal Setup</span>
+                <span>Add / Edit Customer Details</span>
                 <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
                   EPC Admin
                 </span>
@@ -164,12 +188,23 @@ export const AdminCustomerModal: React.FC<AdminCustomerModalProps> = ({
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleClearForm}
+              className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-[11px] font-medium border border-slate-700 transition-colors flex items-center gap-1"
+              title="Clear all fields to start fresh"
+            >
+              <Trash2 className="w-3 h-3 text-rose-400" />
+              <span>Clear Form</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content Body */}
@@ -227,7 +262,7 @@ export const AdminCustomerModal: React.FC<AdminCustomerModalProps> = ({
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleChange('name', e.target.value)}
-                    placeholder="e.g. Rajesh Sharma"
+                    placeholder="Enter customer name or organization"
                     className="w-full bg-slate-800/90 border border-slate-700 text-white rounded-xl px-3 py-2 focus:ring-1 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
@@ -240,7 +275,7 @@ export const AdminCustomerModal: React.FC<AdminCustomerModalProps> = ({
                     type="text"
                     value={formData.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
-                    placeholder="+91 98765 43210"
+                    placeholder="Enter phone / WhatsApp number"
                     className="w-full bg-slate-800/90 border border-slate-700 text-white rounded-xl px-3 py-2 focus:ring-1 focus:ring-amber-500 focus:outline-none"
                   />
                 </div>
@@ -294,8 +329,9 @@ export const AdminCustomerModal: React.FC<AdminCustomerModalProps> = ({
                 <input
                   type="number"
                   step="0.5"
-                  value={formData.sanctionedLoadKw || 5.0}
-                  onChange={(e) => handleChange('sanctionedLoadKw', parseFloat(e.target.value))}
+                  value={formData.sanctionedLoadKw || ''}
+                  onChange={(e) => handleChange('sanctionedLoadKw', parseFloat(e.target.value) || 0)}
+                  placeholder="e.g. 5.0"
                   className="w-full bg-slate-800/90 border border-slate-700 text-white rounded-xl px-3 py-2 font-mono focus:ring-1 focus:ring-amber-500 focus:outline-none"
                 />
               </div>

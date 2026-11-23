@@ -327,11 +327,13 @@ function SolarAppMain() {
         onSelectProposal={handleSelectProposal}
       />
 
-      <AdminCustomerModal
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
-        onOpenPreview={() => setIsPdfOpen(true)}
-      />
+      {isAdminOpen && (
+        <AdminCustomerModal
+          isOpen={isAdminOpen}
+          onClose={() => setIsAdminOpen(false)}
+          onOpenPreview={() => setIsPdfOpen(true)}
+        />
+      )}
 
       <ApproveQuoteModal
         isOpen={isApproveOpen}

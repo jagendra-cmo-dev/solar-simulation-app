@@ -138,7 +138,8 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
     }
 
     setIsExporting(true);
-    const filename = `Solar_Proposal_${clientDetails.name.replace(/\s+/g, '_')}_${genData.systemSizeKwp}kWp.pdf`;
+    const clientNameClean = (clientDetails.name || 'Solar_Proposal').trim().replace(/\s+/g, '_');
+    const filename = `Solar_Proposal_${clientNameClean}_${genData.systemSizeKwp}kWp.pdf`;
     await exportProposalPdf('proposal-document-content', filename);
     setIsExporting(false);
   };
@@ -244,9 +245,9 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                 <span className="text-slate-500 block uppercase text-[10px] font-semibold tracking-wider">
                   Client & Installation Address
                 </span>
-                <span className="font-bold text-slate-900 text-sm block mt-0.5">{clientDetails.name}</span>
-                <span className="text-slate-600 block mt-0.5 leading-relaxed">{clientDetails.address}</span>
-                <span className="text-slate-600 block mt-0.5">Phone: {clientDetails.phone}</span>
+                <span className="font-bold text-slate-900 text-sm block mt-0.5">{clientDetails.name || 'Valued Customer'}</span>
+                <span className="text-slate-600 block mt-0.5 leading-relaxed">{clientDetails.address || 'Address: Pending'}</span>
+                <span className="text-slate-600 block mt-0.5">Phone: {clientDetails.phone || 'Pending'}</span>
                 {clientDetails.email && <span className="text-slate-600 block">Email: {clientDetails.email}</span>}
               </div>
               <div>
@@ -254,7 +255,7 @@ export const ProposalPreviewModal: React.FC<ProposalPreviewModalProps> = ({
                   Utility Connection & Technical Load
                 </span>
                 <span className="font-medium text-slate-800 block mt-0.5">DISCOM: {selectedLocation.discom}</span>
-                <span className="text-slate-600 block font-mono">Consumer ID: {clientDetails.consumerNumber}</span>
+                <span className="text-slate-600 block font-mono">Consumer ID: {clientDetails.consumerNumber || 'Pending'}</span>
                 <span className="text-slate-600 block">
                   Sanctioned Load: {clientDetails.sanctionedLoadKw || 5.0} kW | {clientDetails.connectionPhase || '3-Phase'}
                 </span>

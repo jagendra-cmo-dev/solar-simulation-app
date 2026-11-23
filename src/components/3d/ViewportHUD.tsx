@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Sun,
   Moon,
@@ -11,6 +11,10 @@ import {
   Calendar,
   Clock,
   RotateCcw,
+  X,
+  GripVertical,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import { MONTH_NAMES } from '../../utils/constants';
 import { calculateSunPosition } from '../../utils/solarCalculations';
@@ -30,6 +34,8 @@ interface ViewportHUDProps {
   setIsPlaying: (playing: boolean) => void;
   setHeatmapMode: (active: boolean) => void;
   setCameraPreset: (preset: 'perspective' | 'top_cad' | 'south_elevation' | 'solar_noon') => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 export const ViewportHUD: React.FC<ViewportHUDProps> = ({
@@ -47,7 +53,76 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
   setIsPlaying,
   setHeatmapMode,
   setCameraPreset,
+  isFullscreen = false,
+  onToggleFullscreen,
 }) => {
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const [hintPos, setHintPos] = useState<{ x: number; y: number } | null>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef<{ startX: number; startY: number; initialX: number; initialY: number }>({
+    startX: 0,
+    startY: 0,
+    initialX: 0,
+    initialY: 0,
+  });
+  const hintRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    // If clicking close button, do not drag
+    if ((e.target as HTMLElement).closest('button')) return;
+
+    e.stopPropagation();
+    e.preventDefault();
+
+    const el = hintRef.current;
+    if (!el) return;
+
+    const parent = el.offsetParent as HTMLElement;
+    const parentRect = parent ? parent.getBoundingClientRect() : { left: 0, top: 0 };
+    const elRect = el.getBoundingClientRect();
+
+    const currentX = elRect.left - parentRect.left;
+    const currentY = elRect.top - parentRect.top;
+
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: currentX,
+      initialY: currentY,
+    };
+    isDraggingRef.current = true;
+    el.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current || !hintRef.current) return;
+    e.stopPropagation();
+
+    const deltaX = e.clientX - dragStartRef.current.startX;
+    const deltaY = e.clientY - dragStartRef.current.startY;
+
+    const el = hintRef.current;
+    const parent = el.offsetParent as HTMLElement;
+    const parentW = parent ? parent.clientWidth : window.innerWidth;
+    const parentH = parent ? parent.clientHeight : window.innerHeight;
+    const elW = el.offsetWidth;
+    const elH = el.offsetHeight;
+
+    const nextX = Math.max(10, Math.min(parentW - elW - 10, dragStartRef.current.initialX + deltaX));
+    const nextY = Math.max(10, Math.min(parentH - elH - 10, dragStartRef.current.initialY + deltaY));
+
+    setHintPos({ x: nextX, y: nextY });
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isDraggingRef.current) {
+      isDraggingRef.current = false;
+      try {
+        hintRef.current?.releasePointerCapture(e.pointerId);
+      } catch {}
+    }
+  };
+
   // Format decimal hours to 12-hour AM/PM string (e.g., 14.5 -> "02:30 PM")
   const formatTime = (hours: number): string => {
     const h = Math.floor(hours);
@@ -142,14 +217,68 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
               South
             </button>
           </div>
+
+          {/* Fullscreen View Toggle */}
+          {onToggleFullscreen && (
+            <button
+              onClick={onToggleFullscreen}
+              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border flex items-center gap-1.5 text-xs font-semibold shadow-lg transition-all ${
+                isFullscreen
+                  ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 border-amber-400'
+                  : 'bg-slate-900/85 hover:bg-slate-800 text-slate-200 border-slate-700/60'
+              }`}
+              title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'View 3D Model in Fullscreen'}
+            >
+              {isFullscreen ? (
+                <>
+                  <Minimize2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline text-[11px]">Exit Fullscreen</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="hidden sm:inline text-[11px]">Fullscreen</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Center Interactive Hint (Panel toggle instruction) */}
-      <div className="self-center pointer-events-auto bg-slate-900/70 backdrop-blur-md border border-slate-700/40 rounded-full px-4 py-1 text-xs text-slate-300 shadow-md flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-        <span>Click any panel in 3D to toggle ON/OFF (avoid shaded zones)</span>
-      </div>
+      {/* Draggable Interactive Hint (Bottom-Left by default, movable anywhere) */}
+      {!hintDismissed && (
+        <div
+          ref={hintRef}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          style={
+            hintPos
+              ? { left: `${hintPos.x}px`, top: `${hintPos.y}px` }
+              : undefined
+          }
+          className={`pointer-events-auto bg-slate-900/85 backdrop-blur-md border border-slate-700/70 hover:border-amber-500/50 rounded-full pl-2.5 pr-2 py-1 text-[11px] sm:text-xs text-slate-300 shadow-xl flex items-center gap-2 cursor-grab active:cursor-grabbing select-none transition-shadow touch-none z-20 ${
+            !hintPos ? 'absolute bottom-20 left-4 sm:bottom-20 sm:left-4' : 'absolute'
+          }`}
+          title="Drag to reposition anywhere on the screen"
+        >
+          <GripVertical className="w-3.5 h-3.5 text-slate-500 hover:text-amber-400 shrink-0" />
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+          <span className="whitespace-nowrap font-medium">Click any panel in 3D to toggle ON/OFF (avoid shaded zones)</span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setHintDismissed(true);
+            }}
+            className="p-0.5 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors ml-0.5 cursor-pointer"
+            title="Dismiss hint"
+          >
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
 
       {/* Bottom Floating Sun-Path & Simulation HUD */}
       <div className="pointer-events-auto max-w-4xl w-full mx-auto bg-slate-900/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl text-white">
