@@ -43,7 +43,8 @@ export interface SunPositionResult {
 export function calculateSunPosition(
   timeOfDayHours: number,
   monthOfYear: number,
-  latitude: number = 26.9124
+  latitude: number = 26.9124,
+  radius: number = 45
 ): SunPositionResult {
   // Approximate day of year for the middle of each month
   const dayOfYear = [15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349][monthOfYear] || 80;
@@ -75,7 +76,6 @@ export function calculateSunPosition(
   const azimuthDeg = azimuthRad * (180 / Math.PI);
 
   const isNight = altitudeDeg <= 2;
-  const radius = 45; // distance of light source from roof center
 
   // Three.js coordinates:
   // X: East (-) to West (+), Z: North (-) to South (+)
@@ -110,6 +110,35 @@ export function calculateSunPosition(
     intensity,
     color,
     isNight,
+  };
+}
+
+export function getSolarTimes(monthOfYear: number, latitude: number = 26.9124) {
+  const dayOfYear = [15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349][monthOfYear] || 80;
+  const declinationRad = 23.45 * Math.sin(((284 + dayOfYear) / 365) * 2 * Math.PI) * (Math.PI / 180);
+  const latRad = latitude * (Math.PI / 180);
+
+  const cosHour = -Math.tan(latRad) * Math.tan(declinationRad);
+  const clampedCos = Math.max(-0.999, Math.min(0.999, cosHour));
+  const halfDayHours = (Math.acos(clampedCos) * (180 / Math.PI)) / 15;
+
+  const sunriseHour = Math.max(4.5, Math.min(7.5, 12 - halfDayHours));
+  const sunsetHour = Math.max(16.5, Math.min(19.5, 12 + halfDayHours));
+
+  const formatAMPM = (hDec: number) => {
+    const h = Math.floor(hDec);
+    const m = Math.round((hDec - h) * 60);
+    const period = h >= 12 ? 'PM' : 'AM';
+    const displayH = h % 12 === 0 ? 12 : h % 12;
+    const displayM = m < 10 ? `0${m}` : m;
+    return `${displayH}:${displayM} ${period}`;
+  };
+
+  return {
+    sunriseHour: Math.round(sunriseHour * 10) / 10,
+    sunsetHour: Math.round(sunsetHour * 10) / 10,
+    sunriseStr: formatAMPM(sunriseHour),
+    sunsetStr: formatAMPM(sunsetHour),
   };
 }
 

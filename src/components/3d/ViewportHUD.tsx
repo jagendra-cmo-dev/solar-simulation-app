@@ -17,7 +17,7 @@ import {
   Minimize2,
 } from 'lucide-react';
 import { MONTH_NAMES } from '../../utils/constants';
-import { calculateSunPosition } from '../../utils/solarCalculations';
+import { calculateSunPosition, getSolarTimes } from '../../utils/solarCalculations';
 
 interface ViewportHUDProps {
   timeOfDayHours: number;
@@ -34,6 +34,8 @@ interface ViewportHUDProps {
   setIsPlaying: (playing: boolean) => void;
   setHeatmapMode: (active: boolean) => void;
   setCameraPreset: (preset: 'perspective' | 'top_cad' | 'south_elevation' | 'solar_noon') => void;
+  showSunPath?: boolean;
+  setShowSunPath?: (show: boolean) => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
 }
@@ -53,6 +55,8 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
   setIsPlaying,
   setHeatmapMode,
   setCameraPreset,
+  showSunPath = true,
+  setShowSunPath,
   isFullscreen = false,
   onToggleFullscreen,
 }) => {
@@ -134,6 +138,7 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
   };
 
   const sunData = calculateSunPosition(timeOfDayHours, monthOfYear, latitude);
+  const solarTimes = getSolarTimes(monthOfYear, latitude);
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 z-10 select-none">
@@ -363,6 +368,92 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
+        </div>
+
+        {/* Sub-Bar: Seasonal Presets (Winter/Summer/Equinox/Today) & Sunrise/Sunset Ephemeris */}
+        <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
+          {/* Seasonal Solstice & Equinox Presets */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mr-0.5">Season:</span>
+            <button
+              type="button"
+              onClick={() => setMonthOfYear(11)} // Dec 21 Winter Solstice
+              className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
+                monthOfYear === 11
+                  ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
+                  : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
+              }`}
+              title="Winter Solstice (Lowest Sun trajectory - Dec 21)"
+            >
+              Winter
+            </button>
+            <button
+              type="button"
+              onClick={() => setMonthOfYear(5)} // June 21 Summer Solstice
+              className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
+                monthOfYear === 5
+                  ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                  : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
+              }`}
+              title="Summer Solstice (Highest Sun trajectory - Jun 21)"
+            >
+              Summer
+            </button>
+            <button
+              type="button"
+              onClick={() => setMonthOfYear(2)} // March 21 Equinox
+              className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
+                monthOfYear === 2
+                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                  : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
+              }`}
+              title="Spring Equinox (Equal Day & Night - Mar 21)"
+            >
+              Equinox
+            </button>
+            <button
+              type="button"
+              onClick={() => setMonthOfYear(new Date().getMonth())}
+              className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
+                monthOfYear === new Date().getMonth() && monthOfYear !== 5 && monthOfYear !== 11 && monthOfYear !== 2
+                  ? 'bg-purple-500 text-white font-bold shadow-sm'
+                  : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
+              }`}
+              title="Current Calendar Month"
+            >
+              Today
+            </button>
+          </div>
+
+          {/* Ephemeris Sunrise & Sunset times */}
+          <div className="flex items-center gap-3 font-mono text-[11px]">
+            <span className="flex items-center gap-1 text-amber-400">
+              <Sun className="w-3.5 h-3.5" />
+              <span>Sunrise: <strong>{solarTimes.sunriseStr}</strong></span>
+            </span>
+            <span className="text-slate-600">•</span>
+            <span className="flex items-center gap-1 text-indigo-300">
+              <Moon className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Sunset: <strong>{solarTimes.sunsetStr}</strong></span>
+            </span>
+          </div>
+
+          {/* Sun Path 3D Toggle */}
+          {setShowSunPath && (
+            <button
+              type="button"
+              onClick={() => setShowSunPath(!showSunPath)}
+              className={`px-2.5 py-0.5 rounded-lg font-medium text-[11px] border flex items-center gap-1.5 transition-all ${
+                showSunPath
+                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 font-semibold shadow-sm'
+                  : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
+              }`}
+              title="Toggle 3D Sun Path Arc & Hourly Time Markers"
+            >
+              <Sun className="w-3 h-3 text-amber-400" />
+              <span>Sun Path: {showSunPath ? 'ON' : 'OFF'}</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

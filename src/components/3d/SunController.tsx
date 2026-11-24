@@ -59,27 +59,6 @@ export const SunController: React.FC<SunControllerProps> = ({
       {/* Target for Directional Light (Center of roof) */}
       <object3D position={[0, 0, 0]} />
 
-      {/* Visual Glowing Sun Disc in the Sky */}
-      {!sunData.isNight && (
-        <group position={sunData.lightPosition}>
-          {/* Inner Core */}
-          <mesh>
-            <sphereGeometry args={[1.4, 16, 16]} />
-            <meshBasicMaterial color={sunData.color} />
-          </mesh>
-          {/* Outer Corona Glow */}
-          <mesh>
-            <sphereGeometry args={[2.8, 16, 16]} />
-            <meshBasicMaterial
-              color={sunData.color}
-              transparent
-              opacity={0.3}
-              blending={THREE.AdditiveBlending}
-            />
-          </mesh>
-        </group>
-      )}
-
       {/* Soft Ambient Sky Fill Light */}
       <ambientLight intensity={sunData.isNight ? 0.25 : 0.65} color="#e0f2fe" />
 

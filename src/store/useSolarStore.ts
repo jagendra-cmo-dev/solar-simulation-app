@@ -43,6 +43,7 @@ export const useSolarStore = create<SolarState>((set, get) => ({
   monthOfYear: 3, // April
   isPlayingDaySimulation: false,
   heatmapMode: false,
+  showSunPath: true,
   cameraPreset: 'perspective',
 
   // Site & Consumption
@@ -182,6 +183,7 @@ export const useSolarStore = create<SolarState>((set, get) => ({
   setMonthOfYear: (month: number) => set({ monthOfYear: month }),
   setIsPlayingDaySimulation: (playing: boolean) => set({ isPlayingDaySimulation: playing }),
   setHeatmapMode: (active: boolean) => set({ heatmapMode: active }),
+  setShowSunPath: (show: boolean) => set({ showSunPath: show }),
   setCameraPreset: (preset) => set({ cameraPreset: preset }),
 
   setLocation: (location: LocationPreset) => set({ selectedLocation: location }),

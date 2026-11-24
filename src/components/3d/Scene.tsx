@@ -10,6 +10,7 @@ import { BuildingRooftop } from './BuildingRooftop';
 import { Obstructions } from './Obstructions';
 import { SolarArray } from './SolarArray';
 import { SunController } from './SunController';
+import { SunPathArc } from './SunPathArc';
 import { IrradianceHeatmap } from './IrradianceHeatmap';
 
 function CameraPresetController({ cameraPreset }: { cameraPreset: string }) {
@@ -42,7 +43,7 @@ function CameraPresetController({ cameraPreset }: { cameraPreset: string }) {
       enableDamping
       dampingFactor={0.06}
       minDistance={4}
-      maxDistance={45}
+      maxDistance={65} // Allow full sky orbit to view the entire sun path arc
       maxPolarAngle={Math.PI / 2 - 0.05} // don't go below ground horizon
     />
   );
@@ -63,6 +64,7 @@ export const Scene: React.FC = () => {
     monthOfYear,
     isPlayingDaySimulation,
     heatmapMode,
+    showSunPath,
     cameraPreset,
     selectedLocation,
     setTimeOfDay,
@@ -85,6 +87,15 @@ export const Scene: React.FC = () => {
         latitude={selectedLocation.lat}
         isPlaying={isPlayingDaySimulation}
         setTimeOfDay={setTimeOfDay}
+      />
+
+      {/* 3D Sun Path Arc & Hourly Time Markers */}
+      <SunPathArc
+        timeOfDayHours={timeOfDayHours}
+        monthOfYear={monthOfYear}
+        latitude={selectedLocation.lat}
+        setTimeOfDay={setTimeOfDay}
+        visible={showSunPath}
       />
 
       {/* Camera & Controls */}

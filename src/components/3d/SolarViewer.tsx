@@ -24,6 +24,7 @@ export const SolarViewer: React.FC = () => {
     selectedLocation,
     isPlayingDaySimulation,
     heatmapMode,
+    showSunPath,
     panels,
     selectedPanelTech,
     cameraPreset,
@@ -31,6 +32,7 @@ export const SolarViewer: React.FC = () => {
     setMonthOfYear,
     setIsPlayingDaySimulation,
     setHeatmapMode,
+    setShowSunPath,
     setCameraPreset,
   } = useSolarStore();
 
@@ -110,6 +112,8 @@ export const SolarViewer: React.FC = () => {
         setIsPlaying={setIsPlayingDaySimulation}
         setHeatmapMode={setHeatmapMode}
         setCameraPreset={setCameraPreset}
+        showSunPath={showSunPath}
+        setShowSunPath={setShowSunPath}
         isFullscreen={isFullscreen}
         onToggleFullscreen={handleToggleFullscreen}
       />

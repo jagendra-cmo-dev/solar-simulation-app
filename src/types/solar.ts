@@ -143,6 +143,7 @@ export interface SolarState {
   monthOfYear: number; // 0 (Jan) to 11 (Dec)
   isPlayingDaySimulation: boolean;
   heatmapMode: boolean;
+  showSunPath: boolean;
   cameraPreset: 'perspective' | 'top_cad' | 'south_elevation' | 'solar_noon';
 
   // Site & Consumption Inputs
@@ -186,6 +187,7 @@ export interface SolarState {
   setMonthOfYear: (month: number) => void;
   setIsPlayingDaySimulation: (playing: boolean) => void;
   setHeatmapMode: (active: boolean) => void;
+  setShowSunPath: (show: boolean) => void;
   setCameraPreset: (preset: 'perspective' | 'top_cad' | 'south_elevation' | 'solar_noon') => void;
   
   setLocation: (location: LocationPreset) => void;
