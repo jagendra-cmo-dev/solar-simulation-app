@@ -15,6 +15,7 @@ import {
   GripVertical,
   Maximize2,
   Minimize2,
+  CloudRain,
 } from 'lucide-react';
 import { MONTH_NAMES } from '../../utils/constants';
 import { calculateSunPosition, getSolarTimes } from '../../utils/solarCalculations';
@@ -36,6 +37,8 @@ interface ViewportHUDProps {
   setCameraPreset: (preset: 'perspective' | 'top_cad' | 'south_elevation' | 'solar_noon') => void;
   showSunPath?: boolean;
   setShowSunPath?: (show: boolean) => void;
+  isRainy?: boolean;
+  setIsRainy?: (isRainy: boolean) => void;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
 }
@@ -57,6 +60,8 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
   setCameraPreset,
   showSunPath = true,
   setShowSunPath,
+  isRainy = false,
+  setIsRainy,
   isFullscreen = false,
   onToggleFullscreen,
 }) => {
@@ -370,16 +375,19 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
           </div>
         </div>
 
-        {/* Sub-Bar: Seasonal Presets (Winter/Summer/Equinox/Today) & Sunrise/Sunset Ephemeris */}
+        {/* Sub-Bar: Seasonal Presets (Winter/Summer/Monsoon/Equinox/Today) & Sunrise/Sunset Ephemeris */}
         <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-[11px] text-slate-400 gap-2">
-          {/* Seasonal Solstice & Equinox Presets */}
+          {/* Seasonal Solstice, Monsoon & Equinox Presets */}
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider mr-0.5">Season:</span>
             <button
               type="button"
-              onClick={() => setMonthOfYear(11)} // Dec 21 Winter Solstice
+              onClick={() => {
+                setMonthOfYear(11); // Dec 21 Winter Solstice
+                setIsRainy?.(false);
+              }}
               className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
-                monthOfYear === 11
+                monthOfYear === 11 && !isRainy
                   ? 'bg-sky-500 text-slate-950 font-bold shadow-sm'
                   : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
               }`}
@@ -389,9 +397,12 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setMonthOfYear(5)} // June 21 Summer Solstice
+              onClick={() => {
+                setMonthOfYear(5); // June 21 Summer Solstice
+                setIsRainy?.(false);
+              }}
               className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
-                monthOfYear === 5
+                monthOfYear === 5 && !isRainy
                   ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
                   : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
               }`}
@@ -401,9 +412,28 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setMonthOfYear(2)} // March 21 Equinox
+              onClick={() => {
+                setMonthOfYear(6); // July Monsoon
+                setIsRainy?.(true);
+              }}
+              className={`px-2.5 py-0.5 rounded-lg font-medium transition-all flex items-center gap-1 ${
+                isRainy
+                  ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm ring-1 ring-cyan-300'
+                  : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
+              }`}
+              title="Monsoon Rainy Season (Overcast Storm Clouds & Falling Rain - July/August)"
+            >
+              <CloudRain className={`w-3 h-3 ${isRainy ? 'text-slate-950' : 'text-cyan-400'}`} />
+              <span>Monsoon</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMonthOfYear(2); // March 21 Equinox
+                setIsRainy?.(false);
+              }}
               className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
-                monthOfYear === 2
+                monthOfYear === 2 && !isRainy
                   ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
                   : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
               }`}
@@ -413,9 +443,12 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setMonthOfYear(new Date().getMonth())}
+              onClick={() => {
+                setMonthOfYear(new Date().getMonth());
+                setIsRainy?.(false);
+              }}
               className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
-                monthOfYear === new Date().getMonth() && monthOfYear !== 5 && monthOfYear !== 11 && monthOfYear !== 2
+                monthOfYear === new Date().getMonth() && monthOfYear !== 5 && monthOfYear !== 11 && monthOfYear !== 2 && !isRainy
                   ? 'bg-purple-500 text-white font-bold shadow-sm'
                   : 'bg-slate-800/70 hover:bg-slate-700 text-slate-300'
               }`}
@@ -438,22 +471,40 @@ export const ViewportHUD: React.FC<ViewportHUDProps> = ({
             </span>
           </div>
 
-          {/* Sun Path 3D Toggle */}
-          {setShowSunPath && (
-            <button
-              type="button"
-              onClick={() => setShowSunPath(!showSunPath)}
-              className={`px-2.5 py-0.5 rounded-lg font-medium text-[11px] border flex items-center gap-1.5 transition-all ${
-                showSunPath
-                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 font-semibold shadow-sm'
-                  : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
-              }`}
-              title="Toggle 3D Sun Path Arc & Hourly Time Markers"
-            >
-              <Sun className="w-3 h-3 text-amber-400" />
-              <span>Sun Path: {showSunPath ? 'ON' : 'OFF'}</span>
-            </button>
-          )}
+          {/* Sun Path 3D Toggle & Weather Rain Toggle */}
+          <div className="flex items-center gap-1.5">
+            {setIsRainy && (
+              <button
+                type="button"
+                onClick={() => setIsRainy(!isRainy)}
+                className={`px-2.5 py-0.5 rounded-lg font-medium text-[11px] border flex items-center gap-1.5 transition-all ${
+                  isRainy
+                    ? 'bg-cyan-500/25 border-cyan-400 text-cyan-300 font-semibold shadow-sm'
+                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
+                }`}
+                title="Toggle 3D Falling Rain & Overcast Monsoon Sky"
+              >
+                <CloudRain className={`w-3 h-3 ${isRainy ? 'text-cyan-400 animate-bounce' : 'text-slate-400'}`} />
+                <span>Rain: {isRainy ? 'ON' : 'OFF'}</span>
+              </button>
+            )}
+
+            {setShowSunPath && (
+              <button
+                type="button"
+                onClick={() => setShowSunPath(!showSunPath)}
+                className={`px-2.5 py-0.5 rounded-lg font-medium text-[11px] border flex items-center gap-1.5 transition-all ${
+                  showSunPath
+                    ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 font-semibold shadow-sm'
+                    : 'bg-slate-800/60 border-slate-700 text-slate-400 hover:text-slate-200'
+                }`}
+                title="Toggle 3D Sun Path Arc & Hourly Time Markers"
+              >
+                <Sun className="w-3 h-3 text-amber-400" />
+                <span>Sun Path: {showSunPath ? 'ON' : 'OFF'}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

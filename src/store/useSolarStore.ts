@@ -44,6 +44,7 @@ export const useSolarStore = create<SolarState>((set, get) => ({
   isPlayingDaySimulation: false,
   heatmapMode: false,
   showSunPath: true,
+  isRainy: false,
   cameraPreset: 'perspective',
 
   // Site & Consumption
@@ -184,6 +185,7 @@ export const useSolarStore = create<SolarState>((set, get) => ({
   setIsPlayingDaySimulation: (playing: boolean) => set({ isPlayingDaySimulation: playing }),
   setHeatmapMode: (active: boolean) => set({ heatmapMode: active }),
   setShowSunPath: (show: boolean) => set({ showSunPath: show }),
+  setIsRainy: (isRainy: boolean) => set({ isRainy }),
   setCameraPreset: (preset) => set({ cameraPreset: preset }),
 
   setLocation: (location: LocationPreset) => set({ selectedLocation: location }),

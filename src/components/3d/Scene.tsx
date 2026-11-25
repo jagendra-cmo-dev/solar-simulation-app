@@ -12,6 +12,7 @@ import { SolarArray } from './SolarArray';
 import { SunController } from './SunController';
 import { SunPathArc } from './SunPathArc';
 import { IrradianceHeatmap } from './IrradianceHeatmap';
+import { SkyEnvironment } from './SkyEnvironment';
 
 function CameraPresetController({ cameraPreset }: { cameraPreset: string }) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -65,6 +66,7 @@ export const Scene: React.FC = () => {
     isPlayingDaySimulation,
     heatmapMode,
     showSunPath,
+    isRainy,
     cameraPreset,
     selectedLocation,
     setTimeOfDay,
@@ -77,15 +79,22 @@ export const Scene: React.FC = () => {
     <Canvas
       shadows
       camera={{ position: [13, 11, 14], fov: 45 }}
-      className="w-full h-full bg-gradient-to-b from-sky-400/20 via-sky-200/10 to-slate-900/10"
+      className="w-full h-full"
       gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
     >
+      {/* Dynamic Sky, Clouds, Fog, Stars & Rain */}
+      <SkyEnvironment
+        timeOfDayHours={timeOfDayHours}
+        isRainy={isRainy}
+      />
+
       {/* Sun & Dynamic Lighting Controller */}
       <SunController
         timeOfDayHours={timeOfDayHours}
         monthOfYear={monthOfYear}
         latitude={selectedLocation.lat}
         isPlaying={isPlayingDaySimulation}
+        isRainy={isRainy}
         setTimeOfDay={setTimeOfDay}
       />
 

@@ -10,6 +10,7 @@ interface SunControllerProps {
   monthOfYear: number;
   latitude: number;
   isPlaying: boolean;
+  isRainy?: boolean;
   setTimeOfDay: (hours: number) => void;
 }
 
@@ -18,6 +19,7 @@ export const SunController: React.FC<SunControllerProps> = ({
   monthOfYear,
   latitude,
   isPlaying,
+  isRainy = false,
   setTimeOfDay,
 }) => {
   const dirLightRef = useRef<THREE.DirectionalLight>(null);
@@ -42,9 +44,9 @@ export const SunController: React.FC<SunControllerProps> = ({
       <directionalLight
         ref={dirLightRef}
         position={sunData.lightPosition}
-        intensity={sunData.intensity}
-        color={sunData.color}
-        castShadow
+        intensity={isRainy ? sunData.intensity * 0.25 : sunData.intensity}
+        color={isRainy ? '#94a3b8' : sunData.color}
+        castShadow={!isRainy}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-camera-near={1}
@@ -59,14 +61,17 @@ export const SunController: React.FC<SunControllerProps> = ({
       {/* Target for Directional Light (Center of roof) */}
       <object3D position={[0, 0, 0]} />
 
-      {/* Soft Ambient Sky Fill Light */}
-      <ambientLight intensity={sunData.isNight ? 0.25 : 0.65} color="#e0f2fe" />
+      {/* Soft Ambient Sky Fill Light (diffuse during rain) */}
+      <ambientLight
+        intensity={isRainy ? 0.75 : sunData.isNight ? 0.25 : 0.65}
+        color={isRainy ? '#94a3b8' : '#e0f2fe'}
+      />
 
       {/* Ground Bounce / Hemisphere Light */}
       <hemisphereLight
-        color={sunData.isNight ? '#1e293b' : '#f8fafc'}
-        groundColor="#94a3b8"
-        intensity={sunData.isNight ? 0.2 : 0.4}
+        color={isRainy ? '#64748b' : sunData.isNight ? '#1e293b' : '#f8fafc'}
+        groundColor={isRainy ? '#475569' : '#94a3b8'}
+        intensity={isRainy ? 0.5 : sunData.isNight ? 0.2 : 0.4}
       />
     </group>
   );

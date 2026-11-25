@@ -144,6 +144,7 @@ export interface SolarState {
   isPlayingDaySimulation: boolean;
   heatmapMode: boolean;
   showSunPath: boolean;
+  isRainy: boolean;
   cameraPreset: 'perspective' | 'top_cad' | 'south_elevation' | 'solar_noon';
 
   // Site & Consumption Inputs
@@ -188,6 +189,7 @@ export interface SolarState {
   setIsPlayingDaySimulation: (playing: boolean) => void;
   setHeatmapMode: (active: boolean) => void;
   setShowSunPath: (show: boolean) => void;
+  setIsRainy: (isRainy: boolean) => void;
   setCameraPreset: (preset: 'perspective' | 'top_cad' | 'south_elevation' | 'solar_noon') => void;
   
   setLocation: (location: LocationPreset) => void;
