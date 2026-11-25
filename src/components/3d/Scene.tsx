@@ -13,6 +13,7 @@ import { SunController } from './SunController';
 import { SunPathArc } from './SunPathArc';
 import { IrradianceHeatmap } from './IrradianceHeatmap';
 import { SkyEnvironment } from './SkyEnvironment';
+import { GroundLandscape } from './GroundLandscape';
 
 function CameraPresetController({ cameraPreset }: { cameraPreset: string }) {
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -139,17 +140,13 @@ export const Scene: React.FC = () => {
         onTogglePanel={togglePanel}
       />
 
-      {/* Ground Surrounding (Lawn & Driveway Context) */}
-      <group position={[0, -roofHeight - 0.01, 0]}>
-        {/* Grass / Ground plane */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-          <planeGeometry args={[120, 120]} />
-          <meshStandardMaterial color="#475569" roughness={0.9} />
-        </mesh>
-        
-        {/* Suburban Pavement / Grid Accent */}
-        <gridHelper args={[80, 40, '#64748b', '#334155']} position={[0, 0.02, 0]} />
-      </group>
+      {/* Realistic Ground Terrain, Lush Grass Lawn, Driveway & Surrounding Greenery */}
+      <GroundLandscape
+        roofHeight={roofHeight}
+        buildingLength={roofLength}
+        buildingWidth={roofWidth}
+        isRainy={isRainy}
+      />
     </Canvas>
   );
 };
